@@ -1,0 +1,63 @@
+version: '3.9'
+
+networks:
+  pgsql-net:
+    name: pgsql-net
+    ipam:
+      config:
+        - subnet: 172.61.0.0/16
+
+services:
+  postgresql_db:
+    image: postgres:15.5
+    container_name: postgresql_v15.5
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "train"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - postgres-db-data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      pgsql-net:
+          ipv4_address: 172.61.0.2
+  
+  pgadmin:
+    image: dpage/pgadmin4:8.8
+    container_name: pgadmin4_v8.8
+    restart: always
+    environment:
+       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin4
+      - ./servers.json:/pgadmin4/servers.json
+      - ./pgpass/:/tmp/pgpass
+    depends_on:
+      - "postgresql_db"
+    entrypoint: >
+      /bin/sh -c "
+      chown -R pgadmin:root /tmp/pgpass;
+      chmod -R 600 /tmp/pgpass;
+      /entrypoint.sh;
+      "
+    networks:
+      pgsql-net:
+          ipv4_address: 172.61.0.3
+
+volumes:
+  postgres-db-data:
+    name: postgres_db_data
+  pgadmin-data:
+    name: pgadmin_data
