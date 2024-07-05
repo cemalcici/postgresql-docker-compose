@@ -1,26 +1,26 @@
 version: '3.9'
 
 networks:
-  pgsql-net:
-    name: pgsql-net
-    ipam:
-      config:
-        - subnet: 172.61.0.0/16
+  mlops-network:
+    external: true
 
 services:
   postgresql_db:
-    image: postgres:15.5
-    container_name: postgresql_v15.5
+    image: postgres:15-alpine
+    container_name: postgresql_15
     restart: always
     environment:
+      LANG: tr_TR.utf8
+      TZ: Europe/Istanbul
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=tr-TR"
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "train"]
+      test: ["CMD", "pg_isready -d train_db -U train"]
       interval: 10s
       retries: 5
       start_period: 5s
@@ -28,12 +28,12 @@ services:
       - ./pgsql_data:/var/lib/postgresql/data
       - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      pgsql-net:
-          ipv4_address: 172.61.0.2
+      mlops-network:
+        ipv4_address: 172.61.0.3
   
   pgadmin:
     image: dpage/pgadmin4:8.8
-    container_name: pgadmin4_v8.8
+    container_name: pgadmin4_8.8
     restart: always
     environment:
        PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
@@ -53,5 +53,5 @@ services:
       /entrypoint.sh;
       "
     networks:
-      pgsql-net:
-          ipv4_address: 172.61.0.3
+      mlops-network:
+        ipv4_address: 172.61.0.4

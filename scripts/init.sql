@@ -1,7 +1,11 @@
-CREATE USER mlflow WITH ENCRYPTED PASSWORD 'mlflow';
-CREATE DATABASE mlflow;
-GRANT ALL PRIVILEGES ON DATABASE mlflow to mlflow;
+CREATE USER mlflow_user WITH ENCRYPTED PASSWORD 'mlflow';
+CREATE DATABASE mlflow_db;
+\connect mlflow_db;
+GRANT ALL PRIVILEGES ON DATABASE mlflow_db TO mlflow_user;
+GRANT ALL ON SCHEMA public TO mlflow_user;
 
-CREATE USER airflow WITH ENCRYPTED PASSWORD 'airflow';
-CREATE DATABASE airflow;
-GRANT ALL PRIVILEGES ON DATABASE airflow to airflow;
+CREATE USER airflow_user WITH ENCRYPTED PASSWORD 'airflow';
+CREATE DATABASE airflow_db;
+\connect airflow_db;
+GRANT ALL PRIVILEGES ON DATABASE airflow_db TO airflow_user;
+GRANT ALL ON SCHEMA public TO airflow_user;
