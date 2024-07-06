@@ -6,8 +6,8 @@ networks:
 
 services:
   postgresql_db:
-    image: postgres:15-alpine
-    container_name: postgresql_15
+    image: postgres:13-alpine
+    container_name: postgresql_13
     restart: always
     environment:
       LANG: tr_TR.utf8
@@ -16,7 +16,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
-      POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=tr-TR"
+      POSTGRES_INITDB_ARGS: "--locale=tr-TR.UTF8"
     ports:
       - "5432:5432"
     healthcheck:
